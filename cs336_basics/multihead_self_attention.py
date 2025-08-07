@@ -19,7 +19,7 @@ class MultiHeadSelfAttn(nn.Module):
         self.q_proj = Linear(d_model, d_model)
         self.k_proj = Linear(d_model, d_model)
         self.v_proj = Linear(d_model, d_model)
-        self.o_proj = Linear(d_model, d_model)
+        self.output_proj = Linear(d_model, d_model)
     
     def forward(self, inputs : TensorType["... seq_len d_model", float], rope : RoPE | None = None, token_positions : TensorType["... seq_len", int] | None = None) -> TensorType["... seq_len d_model", float]:
         # perform multihead
@@ -34,4 +34,4 @@ class MultiHeadSelfAttn(nn.Module):
         v_proj_res : TensorType["... h seq_len d_v", float] = rearrange(v_proj_res, "... seq_len (h d_v) -> ... h seq_len d_v", h=self.heads)
         mask = torch.tril(torch.ones(q_proj_res.shape[-2], k_proj_res.shape[-2]), diagonal=0).bool()
         multihead : TensorType["... seq_len hd_v"] = rearrange(scaled_dot_product_attention(q_proj_res, k_proj_res, v_proj_res, mask), "... h seq_len d_v -> ... seq_len (h d_v)")
-        return self.o_proj(multihead)
+        return self.output_proj(multihead)

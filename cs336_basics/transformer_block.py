@@ -21,7 +21,9 @@ class TransformerBlock(nn.Module):
         self.ffn = SwiGLU(d_model, d_ff)
         self.ln2 = RMSNorm(d_model)
         
-    def forward(self, x : TensorType["... seq_len d_model", float], rope : RoPE ) -> TensorType["... seq_len d_model", float]:
-        # TODO: add rope operation
-        y = x + self.attn(self.ln1(x))
+    def forward(self, x : TensorType["... seq_len d_model", float], 
+                rope : RoPE | None = None, 
+                token_positions : TensorType["... seq_len", float] | None = None
+                ) -> TensorType["... seq_len d_model", float]:
+        y = x + self.attn(self.ln1(x), rope, token_positions)
         return y + self.ffn(self.ln2(y))
