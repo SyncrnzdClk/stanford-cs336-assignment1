@@ -19,7 +19,7 @@ class RMSNorm(nn.Module):
         
     def forward(self,
                 x : TensorType["batch_size sequence_length d_model", float]
-                ) -> torch.Tensor:
+                ) -> TensorType["batch_size sequence_length d_model"]:
         in_dtype = x.dtype
         x = x.to(torch.float32)
         

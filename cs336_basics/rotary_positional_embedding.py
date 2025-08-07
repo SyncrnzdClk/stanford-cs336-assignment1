@@ -22,7 +22,7 @@ class RoPE(nn.Module):
         cos_values = torch.cos(angles)
         sin_values = torch.sin(angles)
         R_buffer : TensorType["max_seq_len d_k_half dim1 dim2", float] = rearrange(torch.stack([cos_values, -sin_values, sin_values, cos_values], dim=-1), "max_seq_len d_k_half (dim1 dim2) -> max_seq_len d_k_half dim1 dim2", dim1=2, dim2=2)
-        self.register_buffer("R_buffer", R_buffer, persistent=True)
+        self.register_buffer("R_buffer", R_buffer, persistent=False)
         
     def forward(self, 
                 x : TensorType["... seq_len d_k", float],
