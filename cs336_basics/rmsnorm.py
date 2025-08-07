@@ -15,7 +15,7 @@ class RMSNorm(nn.Module):
         self.eps = torch.tensor(eps).to(device=device, dtype=dtype)
         self.device = device
         self.dtype = dtype
-        self.gain_weights = Parameter(torch.ones(d_model, dtype=dtype))
+        self.weight = Parameter(torch.ones(d_model, dtype=dtype))
         
     def forward(self,
                 x : TensorType["batch_size sequence_length d_model", float]
@@ -25,6 +25,6 @@ class RMSNorm(nn.Module):
         
         
         rms = torch.sqrt(torch.sum(torch.square(x), dim=-1)/self.d_model + self.eps).unsqueeze(-1)
-        rms_norm = self.gain_weights * x / rms
+        rms_norm = self.weight * x / rms
         
         return rms_norm.to(in_dtype)
