@@ -27,3 +27,15 @@ def scaled_dot_product_attention(Q : TensorType["... queries d_k", float],
         attention_weights = softmax(einsum(Q, K, "... queries d_k, ... keys d_k -> ... queries keys") / sqrt(Q.shape[-1]), -1)
     attention_scores = einsum(attention_weights, V, "... queries seq_len, ... seq_len d_v -> ... queries d_v")
     return attention_scores
+
+def cross_entropy(inputs : TensorType["... vocab_size", float],
+                  targets : TensorType["... ", float]
+                  ) -> TensorType["", float]:
+    # for numerical stability, we cannot directly apply the softmax function we defined before
+    # we should perform some transformations to eliminate some exps and logs
+    max_element, _ = inputs.max(dim=-1, keepdim=True)
+    stablized_input = inputs - max_element
+    stablized_input_exp = torch.exp(stablized_input)
+    stablized_input_exp_sum : TensorType["...", float] = stablized_input_exp.sum(dim=-1)
+    target_scores : TensorType["...", float] = torch.gather(stablized_input, dim=1, index=targets.unsqueeze(1)).squeeze(1)
+    return -(target_scores - torch.log(stablized_input_exp_sum)).sum() / torch.tensor(inputs.shape[:-1]).prod()

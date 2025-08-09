@@ -15,7 +15,7 @@ from cs336_basics.embedding import Embedding
 from cs336_basics.rmsnorm import RMSNorm
 from cs336_basics.position_wise_feed_forward import SwiGLU
 from cs336_basics.rotary_positional_embedding import RoPE
-from cs336_basics.utils import softmax, scaled_dot_product_attention
+from cs336_basics.utils import softmax, scaled_dot_product_attention, cross_entropy
 from cs336_basics.multihead_self_attention import MultiHeadSelfAttn
 from cs336_basics.transformer_block import TransformerBlock
 from cs336_basics.transformer_lm import TransformerLM
@@ -476,7 +476,7 @@ def run_cross_entropy(inputs: Float[Tensor, " batch_size vocab_size"], targets: 
     Returns:
         Float[Tensor, ""]: The average cross-entropy loss across examples.
     """
-    raise NotImplementedError
+    return cross_entropy(inputs, targets)
 
 
 def run_gradient_clipping(parameters: Iterable[torch.nn.Parameter], max_l2_norm: float) -> None:
