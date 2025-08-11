@@ -4,6 +4,7 @@ from torch.nn import Parameter
 from torchtyping import TensorType
 from einops import einsum, reduce
 from math import sqrt, cos, pi
+from typing import Iterable
 
 def SiLU(input : TensorType["... in_features", float]) -> TensorType["... in_features", float]:
     return input * torch.sigmoid(input=input)
@@ -49,3 +50,12 @@ def lr_cosine_schedule(t, max_learning_rate, min_learning_rate, warmup_iters, co
         learning_rate = min_learning_rate
     return learning_rate        
         
+def gradient_clipping(parameters: Iterable[torch.nn.Parameter], max_l2_norm: float, eps : float = 1e-6):
+    with torch.no_grad():
+        total_grads = torch.cat([param.grad.reshape(-1) for param in parameters if param.grad is not None])
+        total_norm = torch.norm(total_grads, p=2)
+        if total_norm > max_l2_norm:
+            scale = max_l2_norm / (total_norm + eps)
+            for param in parameters:
+                if param.grad is not None:
+                    param.grad *= scale

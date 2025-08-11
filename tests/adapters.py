@@ -15,7 +15,7 @@ from cs336_basics.embedding import Embedding
 from cs336_basics.rmsnorm import RMSNorm
 from cs336_basics.position_wise_feed_forward import SwiGLU
 from cs336_basics.rotary_positional_embedding import RoPE
-from cs336_basics.utils import softmax, scaled_dot_product_attention, cross_entropy, lr_cosine_schedule
+from cs336_basics.utils import softmax, scaled_dot_product_attention, cross_entropy, lr_cosine_schedule, gradient_clipping
 from cs336_basics.multihead_self_attention import MultiHeadSelfAttn
 from cs336_basics.transformer_block import TransformerBlock
 from cs336_basics.transformer_lm import TransformerLM
@@ -489,8 +489,7 @@ def run_gradient_clipping(parameters: Iterable[torch.nn.Parameter], max_l2_norm:
 
     The gradients of the parameters (parameter.grad) should be modified in-place.
     """
-    raise NotImplementedError
-
+    return gradient_clipping(parameters, max_l2_norm)
 
 def get_adamw_cls() -> type[torch.optim.Optimizer]:
     """
