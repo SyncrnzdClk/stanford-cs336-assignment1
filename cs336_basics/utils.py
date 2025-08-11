@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.nn import Parameter
 from torchtyping import TensorType
 from einops import einsum, reduce
-from math import sqrt
+from math import sqrt, cos, pi
 
 def SiLU(input : TensorType["... in_features", float]) -> TensorType["... in_features", float]:
     return input * torch.sigmoid(input=input)
@@ -39,3 +39,13 @@ def cross_entropy(inputs : TensorType["... vocab_size", float],
     stablized_input_exp_sum : TensorType["...", float] = stablized_input_exp.sum(dim=-1)
     target_scores : TensorType["...", float] = torch.gather(stablized_input, dim=1, index=targets.unsqueeze(1)).squeeze(1)
     return -(target_scores - torch.log(stablized_input_exp_sum)).sum() / torch.tensor(inputs.shape[:-1]).prod()
+
+def lr_cosine_schedule(t, max_learning_rate, min_learning_rate, warmup_iters, cosine_cycle_iters):
+    if t < warmup_iters:
+        learning_rate = t / warmup_iters * max_learning_rate
+    elif t >= warmup_iters and t <= cosine_cycle_iters:
+        learning_rate = min_learning_rate + 1/2 * (1 + cos(pi*(t-warmup_iters)/(cosine_cycle_iters-warmup_iters))) * (max_learning_rate - min_learning_rate)
+    else:
+        learning_rate = min_learning_rate
+    return learning_rate        
+        
