@@ -15,7 +15,7 @@ from cs336_basics.embedding import Embedding
 from cs336_basics.rmsnorm import RMSNorm
 from cs336_basics.position_wise_feed_forward import SwiGLU
 from cs336_basics.rotary_positional_embedding import RoPE
-from cs336_basics.utils import softmax, scaled_dot_product_attention, cross_entropy, lr_cosine_schedule, gradient_clipping
+from cs336_basics.utils import softmax, scaled_dot_product_attention, cross_entropy, lr_cosine_schedule, gradient_clipping, data_loading
 from cs336_basics.multihead_self_attention import MultiHeadSelfAttn
 from cs336_basics.transformer_block import TransformerBlock
 from cs336_basics.transformer_lm import TransformerLM
@@ -445,7 +445,7 @@ def run_get_batch(
         is the sampled input sequences, and the second tuple item is the corresponding
         language modeling labels.
     """
-    raise NotImplementedError
+    return data_loading(dataset, batch_size, context_length, device)
 
 
 def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, " ..."]:

@@ -5,6 +5,8 @@ from torchtyping import TensorType
 from einops import einsum, reduce
 from math import sqrt, cos, pi
 from typing import Iterable
+import numpy as np
+import numpy.typing as npt
 
 def SiLU(input : TensorType["... in_features", float]) -> TensorType["... in_features", float]:
     return input * torch.sigmoid(input=input)
@@ -59,3 +61,10 @@ def gradient_clipping(parameters: Iterable[torch.nn.Parameter], max_l2_norm: flo
             for param in parameters:
                 if param.grad is not None:
                     param.grad *= scale
+                    
+def data_loading(dataset: npt.NDArray, batch_size: int, context_length: int, device: str) -> tuple[torch.Tensor, torch.Tensor]:
+    indices = np.random.randint(len(dataset) - context_length, size=batch_size)
+    indices = indices[:, None] + np.arange(context_length)
+    sample_input = dataset[indices]
+    next_token_targets = dataset[indices+1]
+    return torch.tensor(sample_input, device=device), torch.tensor(next_token_targets, device=device)
