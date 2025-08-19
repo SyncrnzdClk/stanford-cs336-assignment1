@@ -15,7 +15,7 @@ from cs336_basics.embedding import Embedding
 from cs336_basics.rmsnorm import RMSNorm
 from cs336_basics.position_wise_feed_forward import SwiGLU
 from cs336_basics.rotary_positional_embedding import RoPE
-from cs336_basics.utils import softmax, scaled_dot_product_attention, cross_entropy, lr_cosine_schedule, gradient_clipping, data_loading
+from cs336_basics.utils import softmax, scaled_dot_product_attention, cross_entropy, lr_cosine_schedule, gradient_clipping, data_loading, save_checkpoint, load_checkpoint
 from cs336_basics.multihead_self_attention import MultiHeadSelfAttn
 from cs336_basics.transformer_block import TransformerBlock
 from cs336_basics.transformer_lm import TransformerLM
@@ -541,7 +541,7 @@ def run_save_checkpoint(
             we've completed.
         out (str | os.PathLike | BinaryIO | IO[bytes]): Path or file-like object to serialize the model, optimizer, and iteration to.
     """
-    raise NotImplementedError
+    save_checkpoint(model, optimizer, iteration, out)
 
 
 def run_load_checkpoint(
@@ -562,7 +562,7 @@ def run_load_checkpoint(
     Returns:
         int: the previously-serialized number of iterations.
     """
-    raise NotImplementedError
+    return load_checkpoint(src, model, optimizer)
 
 
 def get_tokenizer(

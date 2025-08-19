@@ -7,6 +7,8 @@ from math import sqrt, cos, pi
 from typing import Iterable
 import numpy as np
 import numpy.typing as npt
+import os
+import typing
 
 def SiLU(input : TensorType["... in_features", float]) -> TensorType["... in_features", float]:
     return input * torch.sigmoid(input=input)
@@ -68,3 +70,24 @@ def data_loading(dataset: npt.NDArray, batch_size: int, context_length: int, dev
     sample_input = dataset[indices]
     next_token_targets = dataset[indices+1]
     return torch.tensor(sample_input, device=device), torch.tensor(next_token_targets, device=device)
+
+def save_checkpoint(
+    model : torch.nn.Module,
+    optimizer : torch.optim.Optimizer,
+    iteration : int,
+    out : str | os.PathLike | typing.BinaryIO | typing.IO[bytes]
+):
+    checkpoint = {
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "iteration": iteration
+    }
+    torch.save(checkpoint, out)
+
+def load_checkpoint(src : str | os.PathLike | typing.BinaryIO | typing.IO[bytes],
+                    model : torch.nn.Module, 
+                    optimizer : torch.optim.Optimizer):
+    checkpoint = torch.load(src)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    return checkpoint['iteration']
