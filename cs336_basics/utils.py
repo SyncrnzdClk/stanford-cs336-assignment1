@@ -23,10 +23,11 @@ def softmax(input : TensorType["...", float], dim : int) -> TensorType["...", fl
 def scaled_dot_product_attention(Q : TensorType["... queries d_k", float],
                                  K : TensorType["... keys d_k", float],
                                  V : TensorType["... values d_v", float],
-                                 mask : TensorType["... queries keys", float] | None = None
+                                 mask : TensorType["... queries keys", float] | None = None,
+                                 device: torch.device | None = None
                                  ) -> TensorType["... queries d_v"]:
     if mask is not None:
-        mask = torch.where(mask, 0.0, float('-inf'))
+        mask = torch.where(mask, 0.0, float('-inf')).to(device)
         attention_weights = softmax(einsum(Q, K, "... queries d_k, ... keys d_k -> ... queries keys") / sqrt(Q.shape[-1]) + mask, -1)
     else:
         attention_weights = softmax(einsum(Q, K, "... queries d_k, ... keys d_k -> ... queries keys") / sqrt(Q.shape[-1]), -1)
@@ -42,7 +43,7 @@ def cross_entropy(inputs : TensorType["... vocab_size", float],
     stablized_input = inputs - max_element
     stablized_input_exp = torch.exp(stablized_input)
     stablized_input_exp_sum : TensorType["...", float] = stablized_input_exp.sum(dim=-1)
-    target_scores : TensorType["...", float] = torch.gather(stablized_input, dim=1, index=targets.unsqueeze(1)).squeeze(1)
+    target_scores : TensorType["...", float] = torch.gather(stablized_input, dim=-1, index=targets.unsqueeze(1)).squeeze(1)
     return -(target_scores - torch.log(stablized_input_exp_sum)).sum() / torch.tensor(inputs.shape[:-1]).prod()
 
 def lr_cosine_schedule(t, max_learning_rate, min_learning_rate, warmup_iters, cosine_cycle_iters):
@@ -91,3 +92,9 @@ def load_checkpoint(src : str | os.PathLike | typing.BinaryIO | typing.IO[bytes]
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return checkpoint['iteration']
+
+def data_loader(batch_num: int, dataset: npt.NDArray, batch_size: int, context_length: int, device: str) -> Iterable[tuple[torch.Tensor, torch.Tensor]]:
+    batch_count = 0
+    while batch_count < batch_num:
+        yield data_loading(dataset, batch_size, context_length, device)
+        batch_count += 1

@@ -11,15 +11,17 @@ from math import sqrt
 class MultiHeadSelfAttn(nn.Module):
     def __init__(self,
                  d_model : int, 
-                 num_heads : int
+                 num_heads : int,
+                 device : torch.device | None
                  ) -> None:
         super().__init__()
         assert d_model % num_heads == 0, "d_model is not a multiple of num_heads"
         self.heads : int = num_heads
-        self.q_proj = Linear(d_model, d_model)
-        self.k_proj = Linear(d_model, d_model)
-        self.v_proj = Linear(d_model, d_model)
-        self.output_proj = Linear(d_model, d_model)
+        self.q_proj = Linear(d_model, d_model, device)
+        self.k_proj = Linear(d_model, d_model, device)
+        self.v_proj = Linear(d_model, d_model, device)
+        self.output_proj = Linear(d_model, d_model, device)
+        self.device = device
     
     def forward(self, inputs : TensorType["... seq_len d_model", float], rope : RoPE | None = None, token_positions : TensorType["... seq_len", int] | None = None) -> TensorType["... seq_len d_model", float]:
         # perform multihead
@@ -32,6 +34,6 @@ class MultiHeadSelfAttn(nn.Module):
             q_proj_res = rope(q_proj_res, token_positions)
             k_proj_res = rope(k_proj_res, token_positions)
         v_proj_res : TensorType["... h seq_len d_v", float] = rearrange(v_proj_res, "... seq_len (h d_v) -> ... h seq_len d_v", h=self.heads)
-        mask = torch.tril(torch.ones(q_proj_res.shape[-2], k_proj_res.shape[-2]), diagonal=0).bool()
-        multihead : TensorType["... seq_len hd_v"] = rearrange(scaled_dot_product_attention(q_proj_res, k_proj_res, v_proj_res, mask), "... h seq_len d_v -> ... seq_len (h d_v)")
+        mask = torch.tril(torch.ones(q_proj_res.shape[-2], k_proj_res.shape[-2]), diagonal=0).bool().to(self.device)
+        multihead : TensorType["... seq_len hd_v"] = rearrange(scaled_dot_product_attention(q_proj_res, k_proj_res, v_proj_res), "... h seq_len d_v -> ... seq_len (h d_v)")
         return self.output_proj(multihead)

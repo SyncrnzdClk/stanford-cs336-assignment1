@@ -3,6 +3,7 @@ import json
 from typing import Iterable, Iterator
 from cs336_basics.bpe_tokenizer_train import PAT
 import regex as re
+import pickle
 class Tokenizer():
     def __init__(self, vocab : dict[int, bytes], merges : list[tuple[bytes, bytes]], special_tokens : list[str] | None = None):
         self.vocab = vocab
@@ -16,24 +17,10 @@ class Tokenizer():
     
     @classmethod
     def from_files(cls, vocab_filepath : str, merges_filepath : str, special_tokens : list[str] | None = None):
-        mime = magic.Magic(mime=True)
-        vocab_file_type = mime.from_file(vocab_filepath)
-        merges_file_type = mime.from_file(merges_filepath)
-        vocab = {}
-        if vocab_file_type == "application/json":
-            with open(vocab_filepath, "rb") as f:
-                vocab = json.load(f)
-        elif vocab_filepath == "text/plain":
-            pass
-        
-        if merges_file_type == "application/json":
-            with open(merges_filepath, "rb") as f:
-                merges = json.load(f)
-        elif merges_file_type == "text/plain":
-            with open(merges_filepath, "r") as f:
-                for line in f:
-                    merged_pair = line.strip().split(' ')
-                    merges.append(merged_pair)
+        with open(vocab_filepath, 'rb') as f:
+            vocab = pickle.load(f)
+        with open(merges_filepath, 'rb') as f:
+            merges = pickle.load(f)
         return cls(vocab, merges, special_tokens)
     
     def encode(self, text : str) -> list[int]:

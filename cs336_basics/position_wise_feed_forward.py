@@ -14,8 +14,7 @@ class SwiGLU(nn.Module):
                  ) -> None:
         super().__init__()
         if d_ff is None:
-            d_ff = (round(8 * d_model / 3.0)/64) * 64
-            
+            d_ff = (round(8 * d_model / 3.0)//64) * 64
         self.w1 = Linear(d_model, d_ff)
         self.w2 = Linear(d_ff, d_model)
         self.w3 = Linear(d_model, d_ff)

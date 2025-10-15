@@ -31,4 +31,4 @@ class RoPE(nn.Module):
         # slice the R_buffer
         R_buffer_batch : TensorType["... seq_len d_k_half dim1 dim2", float] = self.R_buffer[token_positions]
         x_rearranged = rearrange(x, "... seq_len (d_k_half dim) -> ... seq_len d_k_half dim", dim=2)
-        return rearrange(einsum(R_buffer_batch, x_rearranged, "... seq_len d_k_half dim1 dim, ... seq_len d_k_half dim -> ... seq_len d_k_half dim1"), "... seq_len d_k_half dim1 -> ... seq_len (d_k_half dim1)")
+        return rearrange(einsum(R_buffer_batch, x_rearranged, "seq_len d_k_half dim1 dim, ... seq_len d_k_half dim -> ... seq_len d_k_half dim1"), "... seq_len d_k_half dim1 -> ... seq_len (d_k_half dim1)")

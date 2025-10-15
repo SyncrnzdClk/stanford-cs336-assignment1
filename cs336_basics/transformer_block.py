@@ -13,13 +13,15 @@ class TransformerBlock(nn.Module):
     def __init__(self,
                  d_model : int,
                  num_heads : int,
-                 d_ff : int
+                 d_ff : int,
+                 device: str | None = None
                  ) -> None:
         super().__init__()
-        self.attn = MultiHeadSelfAttn(d_model, num_heads)
+        self.attn = MultiHeadSelfAttn(d_model, num_heads, device)
         self.ln1 = RMSNorm(d_model)
         self.ffn = SwiGLU(d_model, d_ff)
         self.ln2 = RMSNorm(d_model)
+        self.device = device
         
     def forward(self, x : TensorType["... seq_len d_model", float], 
                 rope : RoPE | None = None, 
