@@ -1,4 +1,3 @@
-import magic
 import json
 from typing import Iterable, Iterator
 from cs336_basics.bpe_tokenizer_train import PAT
