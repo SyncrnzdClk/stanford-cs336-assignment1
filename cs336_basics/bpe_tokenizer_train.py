@@ -90,7 +90,7 @@ def bpe_tokenizer_training(input_path : str, vocab_size : int, special_tokens : 
     num_processes = 8        
     with open(input_path, "rb") as f:
         boundaries = find_chunk_boundaries(
-            f, num_processes, "<endoftext>".encode("utf-8")
+            f, num_processes, "<|endoftext|>".encode("utf-8")
         )
         # construct chunks
         chunks = []
